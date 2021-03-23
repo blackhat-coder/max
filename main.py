@@ -129,6 +129,9 @@ class Ui(QtWidgets.QMainWindow):
             for index in range(0, self.treeWidget.topLevelItemCount())
         ]
 
+    def get_status_label(self, item):
+        return self.treeWidget.itemWidget(item, 0)
+
     def add_to_plalist(self, path):
         if os.path.isdir(path):
             for file in sorted(os.listdir(path)):
@@ -152,14 +155,14 @@ class Ui(QtWidgets.QMainWindow):
             **metadata,
             "path": path,
             "media": content,
-            "item": QtWidgets.QTreeWidgetItem(self.treeWidget),
-            "statuslabel": QtWidgets.QLabel()
+            "item": QtWidgets.QTreeWidgetItem(self.treeWidget)
         })
         track["item"].uniq_id = uniq_id
 
         # this inputs the required slots in place on the tree widget
-        track["statuslabel"].setAlignment(QtCore.Qt.AlignCenter)
-        self.treeWidget.setItemWidget(track["item"], 0, track["statuslabel"])
+        statuslabel = QtWidgets.QLabel()
+        statuslabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.treeWidget.setItemWidget(track["item"], 0, statuslabel)
 
         track["item"].setText(1, f'{(track["trackn"].split("/")[0]):0>2}')
         track["item"].setText(2, track["title"])
@@ -218,7 +221,7 @@ class Ui(QtWidgets.QMainWindow):
                 self.playingStatus.setText("Paused")
                 # playPauseButton.setText("Pause")
                 icon = QtGui.QIcon.fromTheme("media-playback-pause")
-                self.playlist[self.current_uniq_id]["statuslabel"].setPixmap(
+                self.get_status_label(self.playlist[self.current_uniq_id]["item"]).setPixmap(
                     icon.pixmap(icon.actualSize(QtCore.QSize(16, 16))))
                 print("pause")
             else:
@@ -227,7 +230,7 @@ class Ui(QtWidgets.QMainWindow):
                 self.playingStatus.setText("Now Playing")
                 # playPauseButton.setText("Play")
                 icon = QtGui.QIcon.fromTheme("media-playback-start")
-                self.playlist[self.current_uniq_id]["statuslabel"].setPixmap(
+                self.get_status_label(self.playlist[self.current_uniq_id]["item"]).setPixmap(
                     icon.pixmap(icon.actualSize(QtCore.QSize(16, 16))))
                 print("play")
 
@@ -239,10 +242,10 @@ class Ui(QtWidgets.QMainWindow):
     def indicate_now_playing(self, track, brush=None):
         if brush:
             icon = QtGui.QIcon.fromTheme("media-playback-start")
-            track["statuslabel"].setPixmap(icon.pixmap(
+            self.get_status_label(track["item"]).setPixmap(icon.pixmap(
                 icon.actualSize(QtCore.QSize(16, 16))))
         else:
-            track["statuslabel"].clear()
+            self.get_status_label(track["item"]).clear()
         for index in range(7):
             if not brush:
                 track["item"].setData(index, QtCore.Qt.BackgroundRole, None)
